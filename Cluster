@@ -1,0 +1,47 @@
+WN <- arima.sim(model = list(order = c(0, 0, 0)), n = 200)
+
+A_function <- function(t){
+  if (t < 101){
+    return(0)
+  }else if ((t > 100) & (t <201)){
+    return(10*exp(-(t-100)/(20))*cos((2*pi*t)/(4)))
+  }
+}
+
+B_function <- function(t){
+  if (t < 101){
+    return(0)
+  }else if ((t > 100) & (t <201)){
+    return(10*exp(-(t-100)/(200))*cos((2*pi*t)/(4)))
+  }
+}
+
+C_function <- function(t){
+  if ((t >= 101) & (t <= 200)){
+    return(10*exp(-t/20)*cos((2*pi*t)/(4)))
+  }else if ((t >= 1) & (t <= 100)){
+    return(0)
+  }
+}
+
+D_function <- function(t){
+  if ((t >= 101) & (t <= 200)){
+    return(10*exp(-t/200)*cos((2*pi*t)/(4)))
+  }else if ((t >= 1) & (t <= 100)){
+    return (0)
+  }
+}
+
+result_A <- 1:200
+result_B <- 1:200
+result_C <- 1:200
+result_D <- 1:200
+for (i in 1:200){
+  result_A[i] <- WN[i] + A_function(i)
+  result_B[i] <- WN[i] + B_function(i)
+  result_C[i] <- WN[i] + C_function(i)
+  result_D[i] <- WN[i] + D_function(i)
+}
+
+par(mfrow = c(2,1))
+plot.ts(result_A, xlab = 'Funcion de la pregun
