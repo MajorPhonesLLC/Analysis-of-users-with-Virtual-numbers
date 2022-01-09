@@ -1,0 +1,943 @@
+Librerias a Utilizar
+library(forecast)
+
+library(tseries)
+library(funtimes)
+library(TSA)
+##########################
+#Carga de Datos
+ventasTrimestrales <- read.delim("~/Series de Tiempo/Tarea 4/PredictingRetailSales.txt", comment.char="#")
+TIME <- na.omit(ventasTrimestrales[,1])
+WASA <- na.omit(ventasTrimestrales[,2])
+EMPL <- na.omit(ventasTrimestrales[,3])
+BLDG <- na.omit(ventasTrimestrales[,4])
+AUTO <- na.omit(ventasTrimestrales[,5])
+FURN <- na.omit(ventasTrimestrales[,6])
+GMER <- na.omit(ventasTrimestrales[,7])
+
+#Suavizado por Promedio movil para ventas trimestrales
+p_movil_WASA <- filter(WASA, sides = 2, rep(1,3)/3)
+p_movil_WASA <- na.omit(p_movil_WASA)
+par(mfrow = c(2,1))
+plot.ts(WASA, xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Sueldos y salarios a nivel nacional (1979-1989)')
+plot(p_movil_WASA, xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Promedio movil de 3 puntos')
+
+p_movil_EMPL <- filter(EMPL, sides = 2, rep(1,5)/5)
+p_movil_EMPL <- na.omit(p_movil_EMPL)
+par(mfrow = c(2,1))
+plot.ts(EMPL, xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Empleados en las nominas de los establecimientos no agricolas')
+plot(p_movil_EMPL, xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Promedio movil de 5 puntos')
+
+p_movil_BLDG <- filter(BLDG, sides = 2, rep(1,5)/5)
+p_movil_BLDG <- na.omit(p_movil_BLDG)
+par(mfrow = c(2,1))
+plot.ts(BLDG, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de material de construccion')
+plot(p_movil_BLDG, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Promedio movil de 5 puntos')
+
+p_movil_AUTO <- filter(AUTO, sides = 2, rep(1,5)/5)
+p_movil_AUTO <- na.omit(p_movil_AUTO)
+par(mfrow = c(2,1))
+plot.ts(AUTO, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios automotrices')
+plot(p_movil_AUTO, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Promedio movil de 5 puntos')
+
+p_movil_FURN <- filter(FURN, sides = 2, rep(1,5)/5)
+p_movil_FURN <- na.omit(p_movil_FURN)
+par(mfrow = c(2,1))
+plot.ts(FURN, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de muebles y articulos para el hogar')
+plot(p_movil_FURN, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Promedio movil de 5 puntos')
+
+p_movil_GMER <- filter(GMER, sides = 2, rep(1,5)/5)
+p_movil_GMER <- na.omit(p_movil_GMER)
+par(mfrow = c(2,1))
+plot.ts(GMER, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios de mercancias generales')
+plot(p_movil_GMER, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Promedio movil de 5 puntos')
+
+#Suavizado Logaritmico para ventas trimestrales
+log_WASA <- log(WASA)
+summary(log_WASA)
+summary(WASA)
+IQR(log_WASA)
+IQR(WASA)
+par(mfrow = c(2,1))
+plot.ts(WASA,xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Sueldos y salarios a nivel nacional (1979-1989)')
+plot.ts(log_WASA, xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Suavizado por logaritmo' )
+
+log_EMPL <- log(EMPL)
+summary(log_EMPL)
+summary(EMPL)
+IQR(log_EMPL)
+IQR(EMPL)
+par(mfrow = c(2,1))
+plot.ts(EMPL,xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Empleados en las nominas de los establecimientos no agricolas')
+plot.ts(log_EMPL, xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Suavizado por logaritmo' )
+
+log_BLDG <- log(BLDG)
+summary(log_BLDG)
+summary(BLDG)
+IQR(log_BLDG)
+IQR(BLDG)
+par(mfrow = c(2,1))
+plot.ts(BLDG,xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de material de construccion')
+plot.ts(log_BLDG, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por logaritmo' )
+
+log_AUTO <- log(AUTO)
+summary(log_AUTO)
+summary(AUTO)
+IQR(log_AUTO)
+IQR(AUTO)
+par(mfrow = c(2,1))
+plot.ts(AUTO,xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios automotrices')
+plot.ts(log_AUTO, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por logaritmo' )
+
+log_FURN <- log(FURN)
+summary(log_FURN)
+summary(FURN)
+IQR(log_FURN)
+IQR(FURN)
+par(mfrow = c(2,1))
+plot.ts(FURN,xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de muebles y articulos para el hogar')
+plot.ts(log_FURN, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por logaritmo' )
+
+log_GMER <- log(GMER)
+summary(log_GMER)
+summary(GMER)
+IQR(log_GMER)
+IQR(GMER)
+par(mfrow = c(2,1))
+plot.ts(GMER,xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios de mercancias generales')
+plot.ts(log_GMER, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por logaritmo' )
+
+#Suavizado por Diferencias para ventas trimestrales
+d_WASA <- diff(diff(WASA, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(WASA, xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Sueldos y salarios a nivel nacional (1979-1989)')
+plot.ts(d_WASA, xlab = 'Trimestres (1979-1989)', ylab = 'Sueldos y salarios a nivel nacional', main = 'Suavizado por diferencias')
+
+d_EMPL <- diff(diff(EMPL, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(EMPL, xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Empleados en las nominas de los establecimientos no agricolas')
+plot.ts(d_EMPL, xlab = 'Trimestres (1979-1989)', ylab = 'Numero de empleados', main = 'Suavizado por diferencias' )
+
+d_BLDG <- diff(diff(BLDG, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(BLDG, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de material de construccion')
+plot.ts(d_BLDG, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por diferencias' )
+
+d_AUTO <- diff(diff(AUTO, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(AUTO, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios automotrices')
+plot.ts(d_AUTO, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por diferencias' )
+
+d_FURN <- diff(diff(FURN, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(FURN, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los distribuidores de muebles y articulos para el hogar')
+plot.ts(d_FURN, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por diferencias' )
+
+d_GMER <- diff(diff(GMER, lag = 1), lag = 1)
+par(mfrow = c(2,1))
+plot.ts(GMER, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Ventas de los concesionarios de mercancias generales')
+plot.ts(d_GMER, xlab = 'Trimestres (1979-1989)', ylab = 'Ventas (Millones de dolares)', main = 'Suavizado por diferencias' )
+
+#Pregunta 2
+#Calculo de la ACF
+par(mfrow = c(2,1))
+acfWASA <- Acf(WASA)
+acfWASAnumerico <- as.vector(acfWASA[[1]])
+
+acfEMPL <- Acf(EMPL)
+acfEMPLnumerico <- as.vector(acfEMPL[[1]])
+
+acfBLDG <- Acf(BLDG)
+acfBLDGnumerico <- as.vector(acfBLDG[[1]])
+
+acfAUTO <- Acf(AUTO)
+acfAUTOnumerico <- as.vector(acfAUTO[[1]])
+
+acfFURN <- Acf(FURN)
+acfFURNnumerico <- as.vector(acfFURN[[1]])
+
+acfGMER <- Acf(GMER)
+acfGMERnumerico <- as.vector(acfGMER[[1]])
+
+#Calculo de la ACF para las series suavizadas por promedio movil
+acf_p_movil_WASA <- Acf(p_movil_WASA)
+acf_p_movil_WASAnumerico <- as.vector(acf_p_movil_WASA[[1]])
+
+acf_p_movil_EMPL <- Acf(p_movil_EMPL)
+acf_p_movil_EMPLnumerico <- as.vector(acf_p_movil_EMPL[[1]])
+
+acf_p_movil_BLDG <- Acf(p_movil_BLDG)
+acf_p_movil_BLDGnumerico <- as.vector(acf_p_movil_BLDG[[1]])
+
+acf_p_movil_AUTO <- Acf(p_movil_AUTO)
+acf_p_movil_AUTOnumerico <- as.vector(acf_p_movil_AUTO[[1]])
+
+acf_p_movil_FURN <- Acf(p_movil_FURN)
+acf_p_movil_FURNnumerico <- as.vector(acf_p_movil_FURN[[1]])
+
+acf_p_movil_GMER <- Acf(p_movil_GMER)
+acf_p_movil_GMERnumerico <- as.vector(acf_p_movil_GMER[[1]])
+
+#Calculo de la ACF para las series con suavizado logaritmico
+acf_log_WASA <- Acf(log_WASA)
+acf_log_WASAnumerico <- as.vector(acf_log_WASA[[1]])
+
+acf_log_EMPL <- Acf(log_EMPL)
+acf_log_EMPLnumerico <- as.vector(acf_log_EMPL[[1]])
+
+acf_log_BLDG <- Acf(log_BLDG)
+acf_log_BLDGnumerico <- as.vector(acf_log_BLDG[[1]])
+
+acf_log_AUTO <- Acf(log_AUTO)
+acf_log_AUTOnumerico <- as.vector(acf_log_AUTO[[1]])
+
+acf_log_FURN <- Acf(log_FURN)
+acf_log_FURNnumerico <- as.vector(acf_log_FURN[[1]])
+
+acf_log_GMER <- Acf(log_GMER)
+acf_log_GMERnumerico <- as.vector(acf_log_GMER[[1]])
+
+#Calculo de la ACF para las series con suavizado por diferencias
+acf_d_WASA <- Acf(d_WASA)
+acf_d_WASAnumerico <- as.vector(acf_d_WASA[[1]])
+
+acf_d_EMPL <- Acf(d_EMPL)
+acf_d_EMPLnumerico <- as.vector(acf_d_EMPL[[1]])
+
+acf_d_BLDG <- Acf(d_BLDG)
+acf_d_BLDGnumerico <- as.vector(acf_d_BLDG[[1]])
+
+acf_d_AUTO <- Acf(d_AUTO)
+acf_d_AUTOnumerico <- as.vector(acf_d_AUTO[[1]])
+
+acf_d_FURN <- Acf(d_FURN)
+acf_d_FURNnumerico <- as.vector(acf_d_FURN[[1]])
+
+acf_d_GMER <- Acf(d_GMER)
+acf_d_GMERnumerico <- as.vector(acf_d_GMER[[1]])
+
+#Calculo de la PACF
+pcfWASA <- Pacf(WASA)
+pcfWASAnumerico <- as.vector(pcfWASA[[1]])
+
+pcfEMPL <- Pacf(EMPL)
+pcfEMPLnumerico <- as.vector(pcfEMPL[[1]])
+
+pcfBLDG <- Pacf(BLDG)
+pcfBLDGnumerico <- as.vector(pcfBLDG[[1]])
+
+pcfAUTO <- Pacf(AUTO)
+pcfAUTOnumerico <- as.vector(pcfAUTO[[1]])
+
+pcfFURN <- Pacf(FURN)
+pcfFURNnumerico <- as.vector(pcfFURN[[1]])
+
+pcfGMER <- Pacf(GMER)
+pcfGMERnumerico <- as.vector(pcfGMER[[1]])
+
+#Calculo de la PACF para las series suavizadas por promedio movil
+pcf_p_movil_WASA <- Pacf(p_movil_WASA)
+pcf_p_movil_WASAnumerico <- as.vector(pcf_p_movil_WASA[[1]])
+
+pcf_p_movil_EMPL <- Pacf(p_movil_EMPL)
+pcf_p_movil_EMPLnumerico <- as.vector(pcf_p_movil_EMPL[[1]])
+
+pcf_p_movil_BLDG <- Pacf(p_movil_BLDG)
+pcf_p_movil_BLDGnumerico <- as.vector(pcf_p_movil_BLDG[[1]])
+
+pcf_p_movil_AUTO <- Pacf(p_movil_AUTO)
+pcf_p_movil_AUTOnumerico <- as.vector(pcf_p_movil_AUTO[[1]])
+
+pcf_p_movil_FURN <- Pacf(p_movil_FURN)
+pcf_p_movil_FURNnumerico <- as.vector(pcf_p_movil_FURN[[1]])
+
+pcf_p_movil_GMER <- Pacf(p_movil_GMER)
+pcf_p_movil_GMERnumerico <- as.vector(pcf_p_movil_GMER[[1]])
+
+#Calculo de la PACF para las series con suavizado logaritmico
+pcf_log_WASA <- Pacf(log_WASA)
+pcf_log_WASAnumerico <- as.vector(pcf_log_WASA[[1]])
+
+pcf_log_EMPL <- Pacf(log_EMPL)
+pcf_log_EMPLnumerico <- as.vector(pcf_log_EMPL[[1]])
+
+pcf_log_BLDG <- Pacf(log_BLDG)
+pcf_log_BLDGnumerico <- as.vector(pcf_log_BLDG[[1]])
+
+pcf_log_AUTO <- Pacf(log_AUTO)
+pcf_log_AUTOnumerico <- as.vector(pcf_log_AUTO[[1]])
+
+pcf_log_FURN <- Pacf(log_FURN)
+pcf_log_FURNnumerico <- as.vector(pcf_log_FURN[[1]])
+
+pcf_log_GMER <- Pacf(log_GMER)
+pcf_log_GMERnumerico <- as.vector(pcf_log_GMER[[1]])
+
+#Calculo de la PACF para las series con suavizado por diferencias
+pcf_d_WASA <- Pacf(d_WASA)
+pcf_d_WASAnumerico <- as.vector(pcf_d_WASA[[1]])
+
+pcf_d_EMPL <- Pacf(d_EMPL)
+pcf_d_EMPLnumerico <- as.vector(pcf_d_EMPL[[1]])
+
+pcf_d_BLDG <- Pacf(d_BLDG)
+pcf_d_BLDGnumerico <- as.vector(pcf_d_BLDG[[1]])
+
+pcf_d_AUTO <- Pacf(d_AUTO)
+pcf_d_AUTOnumerico <- as.vector(pcf_d_AUTO[[1]])
+
+pcf_d_FURN <- Pacf(d_FURN)
+pcf_d_FURNnumerico <- as.vector(pcf_d_FURN[[1]])
+
+pcf_d_GMER <- Pacf(d_GMER)
+pcf_d_GMERnumerico <- as.vector(pcf_d_GMER[[1]])
+
+#Pregunta 3
+#Calculo del valor de q para las series
+acfWASA <- Acf(WASA)
+print('El posible valor para q es 10')
+
+acfEMPL <- Acf(EMPL)
+print('El posible valor para q es 10')
+
+acfBLDG <- Acf(BLDG)
+print('El posible valor para q es 12')
+
+acfAUTO <- Acf(AUTO)
+print('El posible valor para q es 10')
+
+acfFURN <- Acf(FURN)
+print('El posible valor para q es 10')
+
+acfGMER <- Acf(GMER)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+#Calculo del valor de q para las series suavizadas por promedio movil
+acf_p_movil_WASA <- Acf(p_movil_WASA)
+print('El posible valor para q es 9')
+
+acf_p_movil_EMPL <- Acf(p_movil_EMPL)
+print('El posible valor para q es 9')
+
+acf_p_movil_BLDG <- Acf(p_movil_BLDG)
+print('El posible valor para q es 10')
+
+acf_p_movil_AUTO <- Acf(p_movil_AUTO)
+print('El posible valor para q es 10')
+
+acf_p_movil_FURN <- Acf(p_movil_FURN)
+print('El posible valor para q es 9')
+
+acf_p_movil_GMER <- Acf(p_movil_GMER)
+print('El posible valor para q es 8')
+
+#Calculo del valor de q para las series con suavizado logaritmico
+acf_log_WASA <- Acf(log_WASA)
+print('El posible valor para q es 10')
+
+acf_log_EMPL <- Acf(log_EMPL)
+print('El posible valor para q es 10')
+
+acf_log_BLDG <- Acf(log_BLDG)
+print('El posible valor para q es 12')
+
+acf_log_AUTO <- Acf(log_AUTO)
+print('El posible valor para q es 10')
+
+acf_log_FURN <- Acf(log_FURN)
+print('El posible valor para q es 12')
+
+acf_log_GMER <- Acf(log_GMER)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+#Calculo del valor de q para las series con suavizado por diferencias
+acf_d_WASA <- Acf(d_WASA)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+acf_d_EMPL <- Acf(d_EMPL)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+acf_d_BLDG <- Acf(d_BLDG)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+acf_d_AUTO <- Acf(d_AUTO)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+acf_d_FURN <- Acf(d_FURN)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+acf_d_GMER <- Acf(d_GMER)
+print('No existe un valor de q para ajustarle un modelo MA(q)')
+
+#Calculo del valor de p para las series
+pcfWASA <- Pacf(WASA)
+print('El posible valor para p es 1')
+
+pcfEMPL <- Pacf(EMPL)
+print('El posible valor para p es 1')
+
+pcfBLDG <- Pacf(BLDG)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcfAUTO <- Pacf(AUTO)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcfFURN <- Pacf(FURN)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcfGMER <- Pacf(GMER)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+#Calculo del valor de p para las series suavizadas por promedio movil
+pcf_p_movil_WASA <- Pacf(p_movil_WASA)
+print('El posible valor para p es 1')
+
+pcf_p_movil_EMPL <- Pacf(p_movil_EMPL)
+print('El posible valor para p es 1')
+
+pcf_p_movil_BLDG <- Pacf(p_movil_BLDG)
+print('El posible valor para p es 1')
+
+pcf_p_movil_AUTO <- Pacf(p_movil_AUTO)
+print('El posible valor para p es 1')
+
+pcf_p_movil_FURN <- Pacf(p_movil_FURN)
+print('El posible valor para p es 1')
+
+pcf_p_movil_GMER <- Pacf(p_movil_GMER)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+#Calculo del valor de p para las series con suavizado logaritmico
+pcf_log_WASA <- Pacf(log_WASA)
+print('El posible valor para p es 1')
+
+pcf_log_EMPL <- Pacf(log_EMPL)
+print('El posible valor para p es 1')
+
+pcf_log_BLDG <- Pacf(log_BLDG)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_log_AUTO <- Pacf(log_AUTO)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_log_FURN <- Pacf(log_FURN)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_log_GMER <- Pacf(log_GMER)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+#Calculo del valor de p para las series con suavizado por diferencias
+pcf_d_WASA <- Pacf(d_WASA)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_d_EMPL <- Pacf(d_EMPL)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_d_BLDG <- Pacf(d_BLDG)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_d_AUTO <- Pacf(d_AUTO)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_d_FURN <- Pacf(d_FURN)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+pcf_d_GMER <- Pacf(d_GMER)
+print('No existe un valor de p para ajustarle un modelo AR(p)')
+
+#Ajuste de modelos AR y/o MA
+MA_WASA <- arima(WASA, order = c(0,0,10))
+par(mfrow=c(1,1))
+ts.plot(WASA)
+MA_WASA_fit <- WASA - resid(MA_WASA)
+points(MA_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(MA_WASA)
+AIC(MA_WASA)
+#
+AR_WASA <- arima(WASA, order = c(1,0,0))
+ts.plot(WASA)
+AR_WASA_fit <- WASA - resid(AR_WASA)
+points(AR_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(AR_WASA)
+AIC(AR_WASA)
+
+MA_EMPL <- arima(EMPL, order = c(0,0,10))
+ts.plot(EMPL, main = 'Empleados en la nominas de los establecimientos no agricolas (MA)')
+MA_EMPL_fit <- EMPL - resid(MA_EMPL)
+points(MA_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(MA_EMPL)
+AIC(MA_EMPL)
+#
+AR_EMPL <- arima(EMPL, order = c(1,0,0)) 
+ts.plot(EMPL, main = 'Empleados en la nominas de los establecimientos no agricolas (AR)')
+AR_EMPL_fit <- EMPL - resid(AR_EMPL)
+points(AR_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(AR_EMPL)
+AIC(AR_EMPL)
+
+MA_BLDG <- arima(BLDG, order = c(0,0,12))
+ts.plot(BLDG, main="Ventas de los materiales de construccion MA")
+MA_BLDG_fit <- BLDG - resid(MA_BLDG)
+points(MA_BLDG_fit, type = "l", col = 2, lty = 2)
+BIC(MA_BLDG)
+AIC(MA_BLDG)
+#Como no se puede hallar el valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos BLDG
+
+MA_AUTO <- arima(AUTO, order = c(0,0,10))
+ts.plot(AUTO)
+MA_AUTO_fit <- AUTO - resid(MA_AUTO)
+points(MA_AUTO_fit, type = "l", col = 2, lty = 2)
+BIC(MA_AUTO)
+AIC(MA_AUTO)
+#Como no se puede hallar el valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos AUTO
+
+MA_FURN <- arima(FURN, order = c(0,0,10))
+ts.plot(FURN, main="Ventas de los distruibuidores de muebles y articulos para el hogar MA")
+MA_FURN_fit <- FURN - resid(MA_FURN)
+points(MA_FURN_fit, type = "l", col = 2, lty = 2)
+BIC(MA_FURN)
+AIC(MA_FURN)
+#Como no se puede hallar el valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos FURN
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos GMER
+
+#Ajuste de modelos AR y/o MA para las series suavizadas por promedio movil
+MA_p_movil_WASA <- arima(p_movil_WASA, order = c(0,0,9))
+ts.plot(p_movil_WASA, main="Sueldos y salarios a nivel nacional MA")
+MA_p_movil_WASA_fit <- p_movil_WASA - resid(MA_p_movil_WASA)
+points(MA_p_movil_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_WASA)
+AIC(MA_p_movil_WASA)
+#
+AR_p_movil_WASA <- arima(p_movil_WASA, order = c(1,0,0))
+ts.plot(p_movil_WASA, main="Sueldos y salarios a nivel nacional AR")
+AR_p_movil_WASA_fit <- p_movil_WASA - resid(AR_p_movil_WASA)
+points(AR_p_movil_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(AR_p_movil_WASA)
+AIC(AR_p_movil_WASA)
+
+MA_p_movil_EMPL <- arima(p_movil_EMPL, order = c(0,0,9))
+ts.plot(p_movil_EMPL, main="Los empleados en las nominas de los establecimientos no agricolas MA")
+MA_p_movil_EMPL_fit <- p_movil_EMPL - resid(MA_p_movil_EMPL)
+points(MA_p_movil_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_EMPL)
+AIC(MA_p_movil_EMPL)
+#
+AR_p_movil_EMPL <- arima(p_movil_EMPL, order = c(1,0,0), method = 'ML')
+ts.plot(p_movil_EMPL, main="Los empleados en las nominas de los establecimientos no agricolas AR")
+AR_p_movil_EMPL_fit <- p_movil_EMPL - resid(AR_p_movil_EMPL)
+points(AR_p_movil_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(AR_p_movil_EMPL)
+AIC(AR_p_movil_EMPL)
+
+MA_p_movil_BLDG <- arima(p_movil_BLDG, order = c(0,0,10))
+ts.plot(p_movil_BLDG, main="Ventas de los distribuidores de material de construccion")
+MA_p_movil_BLDG_fit <- p_movil_BLDG - resid(MA_p_movil_BLDG)
+points(MA_p_movil_BLDG_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_BLDG)
+AIC(MA_p_movil_BLDG)
+#
+AR_p_movil_BLDG <- arima(p_movil_BLDG, order = c(1,0,0))
+ts.plot(p_movil_BLDG, main="Ventas de los distribuidores de material de construccion AR")
+AR_p_movil_BLDG_fit <- p_movil_BLDG - resid(AR_p_movil_BLDG)
+points(AR_p_movil_BLDG_fit, type = "l", col = 2, lty = 2)
+BIC(AR_p_movil_BLDG)
+AIC(AR_p_movil_BLDG)
+
+MA_p_movil_AUTO <- arima(p_movil_AUTO, order = c(0,0,10))
+ts.plot(p_movil_AUTO, main="Ventas de los concesionarios automotrices MA")
+MA_p_movil_AUTO_fit <- p_movil_AUTO - resid(MA_p_movil_AUTO)
+points(MA_p_movil_AUTO_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_AUTO)
+AIC(MA_p_movil_AUTO)
+#
+AR_p_movil_AUTO <- arima(p_movil_AUTO, order = c(1,0,0))
+ts.plot(p_movil_AUTO,  main="Ventas de los concesionarios automotrices AR")
+AR_p_movil_AUTO_fit <- p_movil_AUTO - resid(AR_p_movil_AUTO)
+points(AR_p_movil_AUTO_fit, type = "l", col = 2, lty = 2)
+BIC(AR_p_movil_AUTO)
+AIC(AR_p_movil_AUTO)
+
+MA_p_movil_FURN <- arima(p_movil_FURN, order = c(0,0,9))
+ts.plot(p_movil_FURN, main="Ventas de los distribuidores de muebles y articulos para el hogar MA")
+MA_p_movil_FURN_fit <- p_movil_FURN - resid(MA_p_movil_FURN)
+points(MA_p_movil_FURN_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_FURN)
+AIC(MA_p_movil_FURN)
+#
+AR_p_movil_FURN <- arima(p_movil_FURN, order = c(1,0,0), method = 'ML')
+ts.plot(p_movil_FURN, main="Ventas de los distribuidores de muebles y articulos para el hogar AR")
+AR_p_movil_FURN_fit <- p_movil_FURN - resid(AR_p_movil_FURN)
+points(AR_p_movil_FURN_fit, type = "l", col = 2, lty = 2)
+BIC(AR_p_movil_FURN)
+AIC(AR_p_movil_FURN)
+
+MA_p_movil_GMER <- arima(p_movil_GMER, order = c(0,0,8))
+ts.plot(p_movil_GMER, main="Ventas de los concesionarios de mercancias generales MA")
+MA_p_movil_GMER_fit <- p_movil_GMER - resid(MA_p_movil_GMER)
+points(MA_p_movil_GMER_fit, type = "l", col = 2, lty = 2)
+BIC(MA_p_movil_GMER)
+AIC(MA_p_movil_GMER)
+#Como no se puede hallar un valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos p_movil_GMER
+
+#Ajuste de modelos AR y/o MA para las series con suavizado logaritmico
+MA_log_WASA <- arima(log_WASA, order = c(0,0,10))
+ts.plot(log_WASA, main = "Sueldos y Salarios a Nivel Nacional MA")
+MA_log_WASA_fit <- log_WASA - resid(MA_log_WASA)
+points(MA_log_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(MA_log_WASA)
+AIC(MA_log_WASA)
+#
+AR_log_WASA <- arima(log_WASA, order = c(1,0,0))
+ts.plot(log_WASA,  main = "Sueldos y Salarios a Nivel Nacional AR")
+AR_log_WASA_fit <- log_WASA - resid(AR_log_WASA)
+points(AR_log_WASA_fit, type = "l", col = 2, lty = 2)
+BIC(AR_log_WASA)
+AIC(AR_log_WASA)
+
+MA_log_EMPL <- arima(log_EMPL, order = c(0,0,10))
+ts.plot(log_EMPL,  main = "Empleados en las nominas de los establecimientos MA")
+MA_log_EMPL_fit <- log_EMPL - resid(MA_log_EMPL)
+points(MA_log_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(MA_log_EMPL)
+AIC(MA_log_EMPL)
+#
+AR_log_EMPL <- arima(log_EMPL, order = c(1,0,0))
+ts.plot(log_EMPL, main = "Empleados en las nominas de los establecimientos AR")
+AR_log_EMPL_fit <- log_EMPL - resid(AR_log_EMPL)
+points(AR_log_EMPL_fit, type = "l", col = 2, lty = 2)
+BIC(AR_log_EMPL)
+AIC(AR_log_EMPL)
+#
+MA_log_BLDG <- arima(log_BLDG, order = c(0,0,12))
+ts.plot(log_BLDG, main ="Venta de los distribuidores de material de construccion MA")
+MA_log_BLDG_fit <- log_BLDG - resid(MA_log_BLDG)
+points(MA_log_BLDG_fit, type = "l", col = 2, lty = 2)
+BIC(MA_log_BLDG)
+AIC(MA_log_BLDG)
+#Como no se puede hallar un valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos log_BLDG
+
+MA_log_AUTO <- arima(log_AUTO, order = c(0,0,10))
+ts.plot(log_AUTO, main ="Venta de los concesionarios automotrices MA")
+MA_log_AUTO_fit <- log_AUTO - resid(MA_log_AUTO)
+points(MA_log_AUTO_fit, type = "l", col = 2, lty = 2)
+BIC(MA_log_AUTO)
+AIC(MA_log_AUTO)
+#Como no se puede hallar un valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos log_AUTO
+
+MA_log_FURN <- arima(log_FURN, order = c(0,0,12))
+ts.plot(log_FURN, main = "Venta de los concesionarios de mercancias generales MA")
+MA_log_FURN_fit <- log_FURN - resid(MA_log_FURN)
+points(MA_log_FURN_fit, type = "l", col = 2, lty = 2)
+BIC(MA_log_FURN)
+AIC(MA_log_FURN)
+#Como no se puede hallar un valor de p, entonces no se puede ajustar un modelo AR(p) al conjunto de datos log_FURN
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos log_GMER
+
+#Ajuste de modelos AR y/o MA para las series con suavizado por diferencias
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_WASA
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_EMPL
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_BLDG
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_AUTO
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_FURN
+
+#Como no se pueden hallar valores de p y q, entonces no se pueden ajustar modelos MA(q) y AR(p) al conjunto de datos d_GMER
+
+#Pregunta 4
+#Calculo de los estimadores de Maxima Verosimilitud 
+MA_WASA_ML <- arima(WASA, order = c(0,0,10), method = "ML")
+AR_WASA_ML <- arima(WASA, order = c(1,0,0), method = "ML")
+AR_WASA_YW <- ar.yw(WASA)
+print("Los estimadores utilizando el metodo ML para WASA en el caso MA son:")
+print(MA_WASA_ML)
+print("Los estimadores utilizando el metodo ML para WASA en el caso AR son:")
+print(AR_WASA_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para WASA en el caso AR son:")
+print(AR_WASA_YW)
+
+MA_EMPL_ML <- arima(EMPL, order = c(0,0,10), method = "ML")
+AR_EMPL_ML <- arima(EMPL, order = c(1,0,0), method = "ML")
+AR_WASA_YW <- ar.yw(EMPL)
+print("Los estimadores utilizando el metodo ML para EMPL en el caso MA son:")
+print(MA_EMPL_ML)
+print("Los estimadores utilizando el metodo ML para EMPL en el caso AR son:")
+print(AR_EMPL_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para EMPL en el caso AR son:")
+print(AR_EMPL_YW)
+
+
+MA_BLDG_ML <- arima(BLDG, order = c(0,0,12), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR(p) al conjunto de datos BLDG
+print("Los estimadores utilizando el metodo ML para BLDG en el caso MA son:")
+print(MA_BLDG_ML)
+
+
+MA_AUTO_ML <- arima(AUTO, order = c(0,0,10), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR(p) al conjunto de datos AUTO
+print("Los estimadores utilizando el metodo ML para AUTO en el caso MA son:")
+print(MA_AUTO_ML)
+
+
+
+MA_FURN_ML <- arima(FURN, order = c(0,0,10), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR(p) al conjunto de datos FURN
+print("Los estimadores utilizando el metodo ML para FURN en el caso MA son:")
+print(MA_FURN_ML)
+
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA(q) ni AR(p) al conjunto de datos GMER
+
+
+
+#Calculo de los estimadores de Maxima Verosimilitud para las series suavizadas por promedio movil
+MA_p_movil_WASA_ML <- arima(p_movil_WASA, order = c(0,0,9), method = "ML")
+AR_p_movil_WASA_ML <- arima(p_movil_WASA, order = c(1,0,0), method = "ML")
+AR_p_movil_WASA_YW <- ar.yw(p_movil_WASA)
+print("Los estimadores utilizando el metodo ML para p_movil_WASA en el caso MA son:")
+print(MA_p_movil_WASA_ML)
+print("Los estimadores utilizando el metodo ML para p_movil_WASA en el caso AR son:")
+print(AR_p_movil_WASA_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para p_movil_WASA en el caso AR son:")
+print(AR_p_movil_WASA_YW)
+
+
+MA_p_movil_EMPL_ML <- arima(p_movil_EMPL, order = c(0,0,9), method = "ML")
+AR_p_movil_EMPL_ML <- arima(p_movil_EMPL, order = c(1,0,0), method = "ML")
+AR_p_movil_EMPL_YW <- ar.yw(p_movil_EMPL)
+print("Los estimadores utilizando el metodo ML para p_movil_EMPL en el caso MA son:")
+print(MA_p_movil_EMPL_ML)
+print("Los estimadores utilizando el metodo ML para p_movil_EMPL en el caso AR son:")
+print(AR_p_movil_EMPL_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para p_movil_EMPL en el caso AR son:")
+print(AR_p_movil_EMPL_YW)
+
+MA_p_movil_BLDG_ML <- arima(p_movil_BLDG, order = c(0,0,10), method = "ML")
+AR_p_movil_BLDG_ML <- arima(p_movil_BLDG, order = c(1,0,0), method = "ML")
+AR_p_movil_BLDG_YW <- ar.yw(p_movil_BLDG)
+print("Los estimadores utilizando el metodo ML para p_movil_BLDG en el caso MA son:")
+print(MA_p_movil_BLDG_ML)
+print("Los estimadores utilizando el metodo ML para p_movil_BLDG en el caso AR son:")
+print(AR_p_movil_BLDG_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para p_movil_BLDG en el caso AR son:")
+print(AR_p_movil_BLDG_YW)
+
+MA_p_movil_AUTO_ML <- arima(p_movil_AUTO, order = c(0,0,10), method = "ML")
+AR_p_movil_AUTO_ML <- arima(p_movil_AUTO, order = c(1,0,0), method = "ML")
+AR_p_movil_AUTO_YW <- ar.yw(p_movil_AUTO)
+print("Los estimadores utilizando el metodo ML para p_movil_AUTO en el caso MA son:")
+print(MA_p_movil_AUTO_ML)
+print("Los estimadores utilizando el metodo ML para p_movil_AUTO en el caso AR son:")
+print(AR_p_movil_AUTO_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para p_movil_AUTO en el caso AR son:")
+print(AR_p_movil_AUTO_YW)
+
+MA_p_movil_FURN_ML <- arima(p_movil_FURN, order = c(0,0,9), method = "ML")
+AR_p_movil_FURN_ML <- arima(p_movil_FURN, order = c(1,0,0), method = "ML")
+AR_p_movil_FURN_YW <- ar.yw(p_movil_FURN)
+print("Los estimadores utilizando el metodo ML para p_movil_FURN en el caso MA son:")
+print(MA_p_movil_FURN_ML)
+print("Los estimadores utilizando el metodo ML para p_movil_FURN en el caso AR son:")
+print(AR_p_movil_FURN_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para p_movil_FURN en el caso AR son:")
+print(AR_p_movil_FURN_YW)
+
+
+MA_p_movil_GMER_ML <- arima(p_movil_GMER, order = c(0,0,8), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR(p) al conjunto de datos p_movil_GMER
+print("Los estimadores utilizando el metodo ML para p_movil_GMER en el caso MA son:")
+print(MA_p_movil_GMER_ML)
+
+
+#Calculo de los estimadores de Maxima Verosimilitud para las series con suavizado logaritmico
+MA_log_WASA_ML <- arima(log_WASA, order = c(0,0,10), method = "ML")
+AR_log_WASA_ML <- arima(log_WASA, order = c(1,0,0), method = "ML")
+AR_log_WASA_YW <- ar.yw(log_WASA)
+print("Los estimadores utilizando el metodo ML para log_WASA en el caso MA son:")
+print(MA_log_WASA_ML)
+print("Los estimadores utilizando el metodo ML para log_WASA en el caso AR son:")
+print(AR_log_WASA_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para log_WASA en el caso AR son:")
+print(AR_log_WASA_YW)
+
+
+MA_log_EMPL_ML <- arima(log_EMPL, order = c(0,0,10), method = "ML")
+AR_log_EMPL_ML <- arima(log_EMPL, order = c(1,0,0), method = "ML")
+AR_log_EMPL_YW <- ar.yw(log_EMPL)
+print("Los estimadores utilizando el metodo ML para log_EMPL en el caso MA son:")
+print(MA_log_EMPL_ML)
+print("Los estimadores utilizando el metodo ML para log_EMPL en el caso AR son:")
+print(AR_log_EMPL_ML)
+print("Los estimadores utilizando el metodo Yule-Walker para log_EMPL en el caso AR son:")
+print(AR_log_EMPL_YW)
+
+MA_log_BLDG_ML <- arima(log_BLDG, order = c(0,0,12), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR
+print("Los estimadores utilizando el metodo ML para log_BLDG en el caso MA son:")
+print(MA_log_BLDG_ML)
+
+MA_log_AUTO_ML <- arima(log_AUTO, order = c(0,0,10), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR
+print("Los estimadores utilizando el metodo ML para log_AUTO en el caso MA son:")
+print(MA_log_AUTO_ML)
+
+MA_log_FURN_ML <- arima(log_FURN, order = c(0,0,12), method = "ML")
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se puede ajustar un modelo AR
+print("Los estimadores utilizando el metodo ML para log_FURN en el caso MA son:")
+print(MA_log_FURN_ML)
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#Calculo de los estimadores de Maxima Verosimilitud para las series con suavizado por diferencias
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#No se puede hallar el estimador de Maxima Verosimilitud a estos datos ya que no se pueden ajustar modelos MA ni AR
+
+#Pregunta 5
+#Ajuste de modelo ARMA 
+ARMA_WASA <- arma(na.omit(WASA, order = c(1, 10)))
+ts.plot(WASA, main="Sueldos y salarios a nivel nacional ARMA")
+ARMA_WASA_fit <- WASA - resid(ARMA_WASA)
+points(ARMA_WASA_fit, type = "l", col = 2, lty = 2)
+#
+ARMA_EMPL <- arma(na.omit(EMPL, order = c(1, 10)))
+ts.plot(EMPL, main="Los empleados en las nominas de los establecimientos no agricolas ARMA")
+ARMA_EMPL_fit <- EMPL - resid(ARMA_EMPL)
+points(ARMA_EMPL_fit, type = "l", col = 2, lty = 2)
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo AR(p), entonces no se puede ajustar un modelo ARMA a BLDG
+
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo AR(p), entonces no se puede ajustar un modelo ARMA a AUTO
+
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo AR(p), entonces no se puede ajustar un modelo ARMA a FURN
+
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo AR(p), entonces no se puede ajustar un modelo ARMA a GMER
+
+#Ajuste de modelo ARMA para las series suavizadas por promedio movil
+ARMA_p_movil_WASA <- arma(na.omit(p_movil_WASA, order = c(1, 9)))
+ts.plot(p_movil_WASA, main="Sueldos y salarios a nivel nacional ARMA")
+ARMA_p_movil_WASA_fit <- p_movil_WASA - resid(ARMA_p_movil_WASA)
+points(ARMA_p_movil_WASA_fit, type = "l", col = 2, lty = 2)
+#
+ARMA_p_movil_EMPL <- arma(na.omit(p_movil_EMPL, order = c(1, 10)))
+ts.plot(p_movil_EMPL, main="Los empleados de las nominas de los establecimientos no agricolas ARMA")
+ARMA_p_movil_EMPL_fit <- p_movil_EMPL - resid(ARMA_p_movil_EMPL)
+points(ARMA_p_movil_EMPL_fit, type = "l", col = 2, lty = 2)
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo AR(p), entonces no se puede ajustar un modelo ARMA a BLDG
+#
+ARMA_p_movil_AUTO <- arma(na.omit(p_movil_AUTO, order = c(1, 10)))
+ts.plot(p_movil_AUTO, main="Ventas de los concesionarios automotrices ARMA")
+ARMA_p_movil_AUTO_fit <- p_movil_AUTO - resid(ARMA_p_movil_AUTO)
+points(ARMA_p_movil_AUTO_fit, type = "l", col = 2, lty = 2)
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a FURN
+
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a GMER
+
+#Ajuste de modelo ARMA para las series con suavizado logaritmico
+ARMA_log_WASA <- arma(na.omit(log_WASA, order = c(1, 10)))
+ts.plot(log_WASA, main="Sueldos y salarios a nivel nacional ARMA")
+ARMA_log_WASA_fit <- log_WASA - resid(ARMA_log_WASA)
+points(ARMA_log_WASA_fit, type = "l", col = 2, lty = 2)
+###########################################
+ARMA_log_EMPL <- arma(log_EMPL, order = c(1, 10))
+ts.plot(log_EMPL)
+ARMA_log_EMPL_fit <- log_EMPL - resid(ARMA_log_EMPL)
+points(ARMA_log_EMPL_fit, type = "l", col = 2, lty = 2)
+###########################################################################
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a BLDG
+#JUSTIFICAR MEJOR
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a AUTO
+
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a FURN
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a GMER
+#Ajuste de modelo ARMA para las series con suavizado por diferencias
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a WASA
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a EMPL
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a BLDG
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a AUTO
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a FURN
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo MA(p), entonces no se puede ajustar un modelo ARMA a GMER
+
+#Pregunta 6
+#Calculo de la densidad espectral para las series
+ARMA_WASA_spec <- WASA - ARMA_WASA$residuals
+ARMA_WASA_spec <- na.omit(ARMA_WASA_spec)
+spec_WASA <- ARMAspec(model=list(ma=ARMA_WASA_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#
+ARMA_EMPL_spec <- EMPL - ARMA_EMPL$residuals
+ARMA_EMPL_spec <- na.omit(ARMA_EMPL_spec)
+spec_EMPL <- ARMAspec(model=list(ma=ARMA_EMPL_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para BLDG, no se puede calcular la densidad espectral del mismo
+#
+ARMA_AUTO_spec <- AUTO - ARMA_AUTO$residuals
+ARMA_AUTO_spec <- na.omit(ARMA_AUTO_spec)
+spec_AUTO <- ARMAspec(model=list(ma=ARMA_AUTO_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para FURN, no se puede calcular la densidad espectral del mismo
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para GMER, no se puede calcular la densidad espectral del mismo
+#Calculo de la densidad espectral para las series suavizadas por promedio movil
+ARMA_p_movil_WASA_spec <- p_movil_WASA - ARMA_p_movil_WASA$residuals
+ARMA_p_movil_WASA_spec <- na.omit(ARMA_p_movil_WASA_spec)
+spec_p_movil_WASA <- ARMAspec(model=list(ma=ARMA_p_movil_WASA_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#
+ARMA_p_movil_EMPL_spec <- p_movil_EMPL - ARMA_p_movil_EMPL$residuals
+ARMA_p_movil_EMPL_spec <- na.omit(ARMA_p_movil_EMPL_spec)
+spec_p_movil_EMPL <- ARMAspec(model=list(ma=ARMA_p_movil_EMPL_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para BLDG, no se puede calcular la densidad espectral del mismo
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para AUTO, no se puede calcular la densidad espectral del mismo
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para FURN, no se puede calcular la densidad espectral del mismo
+#
+#Como no existe un valor p para el cual se puede ajustar un modelo ARMA(p,q) para GMER, no se puede calcular la densidad espectral del mismo
+#Calculo de la densidad espectral para las series con suavizado logaritmico
+ARMA_log_WASA_spec <- log_WASA - ARMA_log_WASA$residuals
+ARMA_log_WASA_spec <- na.omit(ARMA_log_WASA_spec)
+spec_log_WASA <- ARMAspec(model=list(ma=ARMA_log_WASA_spec)) 
+print('La frecuencia en la cual se obtiene el valor maximo esta comprendido entre 0 y 0.001')
+#########################################################
+ARMA_log_EMPL <- arma(log_EMPL, order = c(1, 10))
+ts.plot(log_EMPL)
+ARMA_log_EMPL_fit <- log_EMPL - resid(ARMA_log_EMPL)
+points(ARMA_log_EMPL_fit, type = "l", col = 2, lty = 2)
+###########################################################################
+
+
+
+
+
+
+
